@@ -157,7 +157,7 @@ try {
   console.error('Verification error', error);
   return res.json({
      status: 'failed',
-     errorMessage: (error as Error).message,
+     //errorMessage: (error as Error).message,
   });
  }
 

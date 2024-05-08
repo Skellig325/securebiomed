@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
 //schema for authenticator devices
 const authenticatorDeviceSchema = new mongoose.Schema({
@@ -19,6 +19,5 @@ const userSchema = new mongoose.Schema({
 //create a model for the user schema
 const User = mongoose.model('users', userSchema);
 
-
 //export the user model and the authenticator device schema
-export {User, authenticatorDeviceSchema};
+module.exports = { User, authenticatorDeviceSchema };
