@@ -1,10 +1,9 @@
-import express, { Request, Response } from 'express';
-import { VerifyRegistrationResponseOpts, generateRegistrationOptions, verifyRegistrationResponse } from '@simplewebauthn/server';
-import { AuthenticatorDevice, RegistrationResponseJSON } from '@simplewebauthn/typescript-types';
-import { isoUint8Array } from '@simplewebauthn/server/helpers';
-import crypto from 'crypto';
-import config from './config';
-import {User} from '../models/userSchema';
+const express = require('express');
+const { VerifyRegistrationResponseOpts, generateRegistrationOptions, verifyRegistrationResponse } = require('@simplewebauthn/server');
+const { isoUint8Array } = require('@simplewebauthn/server/helpers');
+const crypto = require('crypto');
+const config = require('./config');
+const User = require('../models/userSchema');
 
 const router = express.Router();
 
@@ -13,9 +12,9 @@ const rpID = config.rpID;
 const origin = config.origin;
 
 //POST request to /result, which verifies the registration response
-router.post('/result', async (req: Request, res: Response) => {
+router.post('/result', async (req, res) => {
 
-  const body: RegistrationResponseJSON = req.body;
+  const body = req.body;
   console.log('Received body at /result', body); //checking if we get the body
 
   //check if there is a current challenge in the session, a challenge is a unique string that is generated for each registration almost like a password
@@ -39,7 +38,7 @@ router.post('/result', async (req: Request, res: Response) => {
   const username = req.session.username; //get the username from the session
 
   //verify the registration response
-  const opts: VerifyRegistrationResponseOpts = {
+  const opts = {
     response: body,
     expectedChallenge: `${expectedChallenge}`, //set the expected challenge to the current challenge
     expectedOrigin: origin,
@@ -92,7 +91,7 @@ router.post('/result', async (req: Request, res: Response) => {
 
   if (!existingAuthenticator) {
     //if authenticator does not exist, add it to the user's authenticators
-    const newAuthenticator: AuthenticatorDevice = {
+    const newAuthenticator = {
       credentialID: credentialIDBuffer,
       credentialPublicKey: credentialPublicKeyBuffer,
       counter: registrationInfo.counter,
@@ -112,7 +111,7 @@ router.post('/result', async (req: Request, res: Response) => {
 });
 
 //POST request to /options, which generates registration options
- router.post('/options', async (req: Request, res: Response) => {
+ router.post('/options', async (req, res) => {
   const username = req.body.username;
 
   //store to session
@@ -145,4 +144,4 @@ router.post('/result', async (req: Request, res: Response) => {
   res.json(options);
  });
 
-export default router;
+module.exports = router;
