@@ -129,8 +129,7 @@ async function getUserInfo() {
       elemSuccess.innerText = 'Successfully authenticated!';
 
       //redirect once user is authenticated
-      window.location.href = './dashboard.html'; //sql injection vulnerability
-
+      //window.location.href = './dashboard.html'; //sql injection vulnerability
 
       await getUserInfo();
      } else {
@@ -138,59 +137,20 @@ async function getUserInfo() {
      }
   }
 
-
- //function to logout the user
-async function logout() {
-  const resp = await fetch('/logout');
-  const contentType = resp.headers.get("content-type");
-  
-  if (contentType && contentType.includes("application/json")) {
+  //function to logout the user
+  async function logout() {
+    const resp = await fetch('/logout');
     const json = await resp.json();
-    console.log("1  ----------------------->");
     if (json.status === 'ok') {
-      console.log("2  ----------------------->");
-      const loginnameElement = document.getElementById('loginname');
-      const successElement = document.getElementById('success');
-      
-      if (loginnameElement) {
-        console.log("3 ----------------------->");
-        loginnameElement.innerText = '';
-      }
-      
-      if (successElement) {
-        console.log("4  ----------------------->");
-        successElement.innerText = '';
-      }
-
-      //redirect to the sign-in page after successful logout
-      if (json.redirect) {
-        window.location.href = json.redirect;
-      } else {
-        console.error('Server did not provide a redirect URL');
-      }
+      document.getElementById('success').innerText = '';
+      document.getElementById('loginname').innerText = '';
     }
-  } else {
-    console.error('Server did not return JSON');
   }
-}
-  
+
   fetch('/result', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      // Your data here
-    })
   })
-  .then(response => {
-    const contentType = response.headers.get("content-type");
-    if (contentType && contentType.includes("application/json")) {
-      return response.json();
-    } else {
-      throw new TypeError("Server response is not JSON");
-    }
-  })
+  .then(response => response.json())
   .then(data => {
     //handle the JSON response
     if (data.status === 'ok' && data.redirect) {
@@ -201,3 +161,4 @@ async function logout() {
   .catch(error => {
     console.error('Error:', error);
   });
+  
