@@ -1,9 +1,9 @@
-import express, { Request, Response } from 'express';
-import {User} from '../models/userSchema';
+const express = require('express');
+const User = require('../models/userSchema');
 
 const router = express.Router();
 
-router.get('/userinfo', async (req: Request, res: Response) => {
+router.get('/userinfo', async (req, res) => {
   if (!req.session.isLoggedIn || !req.session.username) {
     return res.json({
       status: 'failed',
@@ -33,7 +33,7 @@ router.get('/userinfo', async (req: Request, res: Response) => {
   }
 });
 
-router.get('/logout', (req: Request, res: Response) => {
+router.get('/logout', (req, res) => {
   req.session.destroy((err) => {
     if (err) {
       return res.json({
@@ -50,4 +50,4 @@ router.get('/logout', (req: Request, res: Response) => {
   });
 });
 
-export default router;
+module.exports = router;
