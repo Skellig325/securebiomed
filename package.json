@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ZygisK/microsoft-biometric-hospital.git"
+    "url": "git+https://github.com/Skellig325/securebiomed.git"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.6",
