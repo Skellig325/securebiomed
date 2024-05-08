@@ -1,50 +1,58 @@
-// ***************************************************************************
-// Bank API code from Web Dev For Beginners project
-// https://github.com/microsoft/Web-Dev-For-Beginners/tree/main/7-bank-project/api
-// ***************************************************************************
-
 const express = require('express');
+const defaultrouttes = require('./routes/default');
+const attestation = require('./routes/attestation');
+const assertion = require('./routes/assertion');
 const bodyParser = require('body-parser');
-const cors = require('cors')
+const cookieParser = require('cookie-parser');
+const expressSession = require('express-session');
 const crypto = require('crypto');
+const mongoose = require('mongoose');
+const cors = require('cors'); // Import CORS module
 
+//const users = require('./routes/users');
 
-
-// App constants
-const port = process.env.PORT || 3000;
-const apiPrefix = '/api';
-
-
-// Create the Express app & setup middlewares
 const app = express();
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+
+//connect to MongoDB
+mongoose.connect('mongodb+srv://deafhole:microsoft@cluster0.7ssubtn.mongodb.net/zygi?retryWrites=true&w=majority&appName=Cluster0').then(
+    () => {console.log('Connected to MongoDB')},
+    err => {console.log('Error connecting to MongoDB')}
+);
+
+// Use CORS middleware
 app.use(cors());
-app.options('*', cors());
 
-// ***************************************************************************
+app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.json())
+app.use(expressSession({
+  secret: crypto.randomBytes(32).toString('hex'),
+  resave: true,
+  saveUninitialized: true
+}));
+app.use(cookieParser());
+app.use(express.static('./src/public/'));
 
-// Configure routes
-const router = express.Router();
+// Add the middleware function to set HTTP headers
+app.use((req, res, next) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+  next();
+});
 
-// Hello World for index page
-// app.get('/', function (req, res) {
-//     return res.send("Hello World!");
-// })
-
+const port = 3000;
 app.get('/api', function (req, res) {
     return res.send("Fabrikam Bank API");
 })
-  
+/** 
+ * routes
+ */
+app.use('/', defaultrouttes);
+app.use('/attestation', attestation);
+app.use('/assertion', assertion);
 
-  
-// ***************************************************************************
+//app.use('/users', users);
 
-// Add 'api` prefix to all routes
-app.use(apiPrefix, router);
-
-// Start the server
 app.listen(port, () => {
-    console.log(`Server listening on port ${port}`);
+  console.log(`listen port: ${port}`);
 });
-  
