@@ -1,27 +1,19 @@
-import express, { Request, Response } from 'express';
-import { generateAuthenticationOptions, verifyAuthenticationResponse,} from '@simplewebauthn/server';
-import type { GenerateAuthenticationOptionsOpts, VerifiedAuthenticationResponse, VerifyAuthenticationResponseOpts,} from '@simplewebauthn/server';
-import config from './config';
-import { AuthenticationResponseJSON } from '@simplewebauthn/server/script/deps';
-import { isoBase64URL, isoUint8Array } from '@simplewebauthn/server/helpers';
-import {User} from '../models/userSchema';
-import { set } from 'mongoose';
+const express = require('express');
+const { generateAuthenticationOptions, verifyAuthenticationResponse } = require('@simplewebauthn/server');
+const config = require('./config');
+const User = require('../models/userSchema');
+const { isoBase64URL, isoUint8Array } = require('@simplewebauthn/server/helpers');
 
-//express module to create a new router
 const router = express.Router();
 
 const rpID = config.rpID;
 const origin = config.origin;
 
 //POST request to /options, which generates authentication options
-router.post('/options', async (req: Request, res: Response) => {
+router.post('/options', async (req, res) => {
 
   //looks for a user with the username provided in the request body
   const user = await User.findOne({ username: req.body.username });
-
-  //const usertest = await User.findOne({ username: "ZygiTestExample@yahoo.com" });
-  //console.log('User found:', usertest);
-
 
   //if the user does not exist or the user does not have any authenticators, return an error message.
   //authenticators is an array of authenticators that the user has registered, such as fingerprint, macbook fingerprint, etc.
@@ -34,7 +26,7 @@ router.post('/options', async (req: Request, res: Response) => {
   }
 
   //generate authentication options
-  const opts: GenerateAuthenticationOptionsOpts = {
+  const opts = {
     timeout: 60000,
     allowCredentials: user.authenticators.map(authenticator => ({
       id: new Uint8Array(authenticator.credentialID),
@@ -63,7 +55,7 @@ router.post('/options', async (req: Request, res: Response) => {
 });
 
 //POST request to /result, which verifies the authentication response
-router.post('/result', async (req: Request, res: Response) => {
+router.post('/result', async (req, res) => {
 
   if(req.session.isLoggedIn){
     return res.json({
@@ -85,9 +77,7 @@ router.post('/result', async (req: Request, res: Response) => {
   }
 
   const expectedChallenge = req.session.currentChallenge;
-  const body: AuthenticationResponseJSON = req.body;
-  //const username = `${req.session.username}`;
-  //const user = database[username];
+  const body = req.body;
 
   if(!body.rawId){
     return res.json({
@@ -116,13 +106,13 @@ router.post('/result', async (req: Request, res: Response) => {
   }
 
   //enum for the transport types, this is used to convert the transport types from the database to the transport types used by the library
-  enum AuthenticatorTransportFuture {
-    USB = 'usb', 
-    BLE = 'ble',
-    NFC = 'nfc',
-    HYBRID = 'hybrid',
-    INTERNAL = 'internal',
-  }
+  const AuthenticatorTransportFuture = {
+    USB: 'usb', 
+    BLE: 'ble',
+    NFC: 'nfc',
+    HYBRID: 'hybrid',
+    INTERNAL: 'internal',
+  };
   
   if (dbAuthenticator) {
     dbAuthenticator = {
@@ -149,11 +139,11 @@ router.post('/result', async (req: Request, res: Response) => {
   }
 
 //verifiedAuthenticationResponse is the response from the verification of the authentication response
-let verification: VerifiedAuthenticationResponse;
+let verification;
 
 //try to verify the authentication response
 try {
-  const opts: VerifyAuthenticationResponseOpts = {
+  const opts = {
      response: body,
      expectedChallenge: `${expectedChallenge}`,
      expectedOrigin: origin,
@@ -193,4 +183,4 @@ const result = {
 res.json(result); //return the result to the client
 });
 
-export default router;
+module.exports = router;
